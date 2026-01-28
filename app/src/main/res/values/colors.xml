@@ -1,0 +1,15 @@
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    
+    <!-- Neumorphic Palette -->
+    <color name="neu_bg">#E0E5EC</color>
+    <color name="neu_shadow_light">#FFFFFF</color>
+    <color name="neu_shadow_dark">#A3B1C6</color>
+    
+    <color name="text_primary">#3E5879</color> <!-- Dark Blue-Grey -->
+    <color name="text_secondary">#7E97B8</color> <!-- Light Blue-Grey -->
+    
+    <color name="screen_bg">#212121</color>
+    <color name="accent_cyan">#4CD5C5</color>
+</resources>
