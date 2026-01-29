@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="?attr/colorControlHighlight">
+    <item>
+        <layer-list>
+            <!-- Dark Shadow (Bottom Right) -->
+            <!-- Pushing content down-right so it peeks out bottom-right -->
+            <item android:left="4dp" android:top="4dp">
+                <shape android:shape="rectangle">
+                    <solid android:color="@color/neu_shadow_dark"/>
+                    <corners android:radius="16dp"/>
+                </shape>
+            </item>
+            
+            <!-- Light Shadow (Top Left) -->
+            <!-- Pushing content up-left so it peeks out top-left -->
+            <item android:right="4dp" android:bottom="4dp">
+                <shape android:shape="rectangle">
+                    <solid android:color="@color/neu_shadow_light"/>
+                    <corners android:radius="16dp"/>
+                </shape>
+            </item>
+            
+            <!-- Main Surface -->
+            <!-- Centered slightly to cover the overlap -->
+            <item android:left="2dp" android:top="2dp" android:right="2dp" android:bottom="2dp">
+                <shape android:shape="rectangle">
+                    <solid android:color="@color/neu_bg"/>
+                    <corners android:radius="16dp"/>
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+</ripple>
