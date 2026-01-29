@@ -19,10 +19,7 @@ public class MainActivity extends AppCompatActivity {
     Button button_1, button_2, button_3, button_4, button_5,
             button_6, button_7, button_8, button_9, button_0,
             button_add, button_sub, button_mul, button_div,
-            button_equal, button_clear, button_dot;
-
-
-
+            button_equal, button_clear, button_dot, button_delete;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +49,9 @@ public class MainActivity extends AppCompatActivity {
         button_div = findViewById(R.id.btn_divide);
         button_equal = findViewById(R.id.btn_equals);
         button_clear = findViewById(R.id.btn_clear);
+        button_delete = findViewById(R.id.btn_delete);
         button_clear.setOnClickListener(v -> clear());
+        button_delete.setOnClickListener(v -> deleteLastChar());
         number_button_event();
 
     }
@@ -74,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
         button_div.setOnClickListener(v -> operator_button_event("/"));
         button_equal.setOnClickListener(v -> equal_button_event());
     }
+
     void operator_button_event(String operator) {
         if (resultTv.getText().toString().isEmpty()) {
             return;
@@ -100,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
         // Clear result for next input
         resultTv.setText("");
     }
+
     void equal_button_event() {
         if (currentOperator.isEmpty() || resultTv.getText().toString().isEmpty()) {
             return;
@@ -159,12 +160,20 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
     void clear() {
         solutionTv.setText("");
         resultTv.setText("0");
         firstNumber = 0;
         currentOperator = "";
         isOperatorPressed = false;
+    }
+
+    void deleteLastChar() {
+        String currentText = resultTv.getText().toString();
+        if (currentText.length() > 1) {
+            resultTv.setText(currentText.substring(0, currentText.length() - 1));
+        } else if (currentText.length() == 1 && !currentText.equals("0")) {
+            resultTv.setText("0");
+        }
     }
 }
