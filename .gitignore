@@ -1,12 +1,57 @@
+# ===== Gradle =====
+.gradle/
+build/
+
+# ===== Android =====
+*.apk
+*.aab
+*.dex
+*.class
+
+# Generated files
+bin/
+gen/
+out/
+
+# Local configuration file (SDK path, etc)
+local.properties
+
+# Log files
+*.log
+
+# ===== Android Studio / IntelliJ =====
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Android Studio captures
+captures/
+
+# External native build
+.externalNativeBuild/
+.cxx/
+
+# ===== Kotlin =====
+.kotlin/
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+
+# ===== Git =====
+*.orig
+
 *.iml
 .gradle
 /local.properties
 /.idea/caches
 /.idea/libraries
-/.idea/modules.xml
+/.idea/modules.xmla
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
+
 .DS_Store
 /build
 /captures
