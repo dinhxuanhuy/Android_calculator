@@ -2,6 +2,7 @@ package com.example.calculator;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -13,13 +14,15 @@ import androidx.core.view.WindowInsetsCompat;
 
 public class MainActivity extends AppCompatActivity {
     TextView resultTv, solutionTv;
-    String currentOperator = "";
-    double firstNumber = 0;
-    boolean isOperatorPressed = false;
     Button button_1, button_2, button_3, button_4, button_5,
             button_6, button_7, button_8, button_9, button_0,
             button_add, button_sub, button_mul, button_div,
             button_equal, button_clear, button_dot, button_delete;
+
+    private StringBuilder expression = new StringBuilder();
+    private boolean isResultDisplayed = false;
+    private static final float SIZE_LARGE = 83f;
+    private static final float SIZE_SMALL = 36f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,126 +57,210 @@ public class MainActivity extends AppCompatActivity {
         button_delete.setOnClickListener(v -> deleteLastChar());
         number_button_event();
 
-    }
-
-    void number_button_event() {
-        button_0.setOnClickListener(v -> appendNumber("0"));
-        button_1.setOnClickListener(v -> appendNumber("1"));
-        button_2.setOnClickListener(v -> appendNumber("2"));
-        button_3.setOnClickListener(v -> appendNumber("3"));
-        button_4.setOnClickListener(v -> appendNumber("4"));
-        button_5.setOnClickListener(v -> appendNumber("5"));
-        button_6.setOnClickListener(v -> appendNumber("6"));
-        button_7.setOnClickListener(v -> appendNumber("7"));
-        button_8.setOnClickListener(v -> appendNumber("8"));
-        button_9.setOnClickListener(v -> appendNumber("9"));
-        button_add.setOnClickListener(v -> operator_button_event("+"));
-        button_sub.setOnClickListener(v -> operator_button_event("-"));
-        button_mul.setOnClickListener(v -> operator_button_event("*"));
-        button_div.setOnClickListener(v -> operator_button_event("/"));
-        button_equal.setOnClickListener(v -> equal_button_event());
-    }
-
-    void operator_button_event(String operator) {
-        if (resultTv.getText().toString().isEmpty()) {
-            return;
-        }
-
-        // If an operator was already pressed, calculate the result first
-        if (isOperatorPressed && !resultTv.getText().toString().isEmpty()) {
-            equal_button_event();
-        }
-
-        // Store the first number
-        String currentText = resultTv.getText().toString();
-        if (!currentText.isEmpty()) {
-            firstNumber = Double.parseDouble(currentText);
-        }
-
-        // Store the operator
-        currentOperator = operator;
-        isOperatorPressed = true;
-
-        // Update the solution TextView to show the expression
-        solutionTv.setText(currentText + " " + operator);
-
-        // Clear result for next input
+        setInputMode();
+        solutionTv.setText("");
         resultTv.setText("");
     }
 
-    void equal_button_event() {
-        if (currentOperator.isEmpty() || resultTv.getText().toString().isEmpty()) {
-            return;
-        }
+    void number_button_event() {
+        button_0.setOnClickListener(v -> appendToExpression("0"));
+        button_1.setOnClickListener(v -> appendToExpression("1"));
+        button_2.setOnClickListener(v -> appendToExpression("2"));
+        button_3.setOnClickListener(v -> appendToExpression("3"));
+        button_4.setOnClickListener(v -> appendToExpression("4"));
+        button_5.setOnClickListener(v -> appendToExpression("5"));
+        button_6.setOnClickListener(v -> appendToExpression("6"));
+        button_7.setOnClickListener(v -> appendToExpression("7"));
+        button_8.setOnClickListener(v -> appendToExpression("8"));
+        button_9.setOnClickListener(v -> appendToExpression("9"));
+        button_add.setOnClickListener(v -> appendToExpression(" + "));
+        button_sub.setOnClickListener(v -> appendToExpression(" − "));
+        button_mul.setOnClickListener(v -> appendToExpression(" × "));
+        button_div.setOnClickListener(v -> appendToExpression(" ÷ "));
+        button_equal.setOnClickListener(v -> calculateResult());
+    }
 
-        double secondNumber = Double.parseDouble(resultTv.getText().toString());
-        double result = 0;
+    private void setInputMode() {
+        solutionTv.setTextSize(TypedValue.COMPLEX_UNIT_SP, SIZE_LARGE);
+        solutionTv.setTextColor(0xFFFFFFFF); // White
+        resultTv.setTextSize(TypedValue.COMPLEX_UNIT_SP, SIZE_SMALL);
+        resultTv.setTextColor(0x80FFFFFF); // Semi-transparent white
+    }
 
-        // Perform calculation based on operator
-        switch (currentOperator) {
-            case "+":
-                result = firstNumber + secondNumber;
-                break;
-            case "-":
-                result = firstNumber - secondNumber;
-                break;
-            case "*":
-                result = firstNumber * secondNumber;
-                break;
-            case "/":
-                if (secondNumber != 0) {
-                    result = firstNumber / secondNumber;
-                } else {
-                    resultTv.setText("Error");
-                    solutionTv.setText("");
-                    currentOperator = "";
-                    isOperatorPressed = false;
-                    return;
-                }
-                break;
-        }
-
-        // Update the solution TextView with complete expression
-        solutionTv.setText(firstNumber + " " + currentOperator + " " + secondNumber + " =");
-
-        // Display result (remove decimal if it's a whole number)
-        if (result == (long) result) {
-            resultTv.setText(String.valueOf((long) result));
-        } else {
-            resultTv.setText(String.valueOf(result));
-        }
-
-        // Reset state
-        firstNumber = result;
-        currentOperator = "";
-        isOperatorPressed = false;
+    private void setResultMode() {
+        solutionTv.setTextSize(TypedValue.COMPLEX_UNIT_SP, SIZE_SMALL);
+        solutionTv.setTextColor(0x80FFFFFF); // Semi-transparent white
+        resultTv.setTextSize(TypedValue.COMPLEX_UNIT_SP, SIZE_LARGE);
+        resultTv.setTextColor(0xFFFFFFFF); // White
     }
 
     @SuppressLint("SetTextI18n")
-    void appendNumber(String number) {
-        String currentText = resultTv.getText().toString();
-        if (currentText.equals("0")) {
-            resultTv.setText(number);
-
-        } else {
-            resultTv.setText(currentText + number);
+    void appendToExpression(String value) {
+        if (isResultDisplayed) {
+            String lastResult = resultTv.getText().toString();
+            if (value.contains("+") || value.contains("−") || value.contains("×") || value.contains("÷")) {
+                expression = new StringBuilder(lastResult);
+            } else {
+                expression = new StringBuilder();
+            }
+            isResultDisplayed = false;
+            setInputMode();
         }
+
+        if (expression.length() == 0 &&
+                (value.equals(" + ") || value.equals(" × ") || value.equals(" ÷ "))) {
+            return;
+        }
+
+        String exprStr = expression.toString();
+        if (exprStr.length() > 0) {
+            boolean lastIsOperator = exprStr.endsWith(" + ") || exprStr.endsWith(" − ") ||
+                    exprStr.endsWith(" × ") || exprStr.endsWith(" ÷ ");
+            boolean newIsOperator = value.equals(" + ") || value.equals(" − ") ||
+                    value.equals(" × ") || value.equals(" ÷ ");
+            if (lastIsOperator && newIsOperator) {
+                // Replace last operator with new one
+                expression = new StringBuilder(exprStr.substring(0, exprStr.length() - 3));
+            }
+        }
+
+        expression.append(value);
+        updateDisplay();
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void updateDisplay() {
+        solutionTv.setText(expression.toString());
+
+        String result = calculateExpression(expression.toString());
+        resultTv.setText(result);
+    }
+
+    private String calculateExpression(String expr) {
+        if (expr.isEmpty())
+            return "";
+
+        try {
+            String calcExpr = expr.replace(" + ", "+")
+                    .replace(" − ", "-")
+                    .replace(" × ", "*")
+                    .replace(" ÷ ", "/")
+                    .trim();
+
+            if (calcExpr.endsWith("+") || calcExpr.endsWith("-") ||
+                    calcExpr.endsWith("*") || calcExpr.endsWith("/")) {
+                calcExpr = calcExpr.substring(0, calcExpr.length() - 1);
+            }
+
+            if (calcExpr.isEmpty())
+                return "";
+
+            double result = evaluateExpression(calcExpr);
+
+            if (Double.isInfinite(result) || Double.isNaN(result)) {
+                return "Error";
+            }
+            if (result == (long) result) {
+                return String.valueOf((long) result);
+            } else {
+                return String.valueOf(result);
+            }
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    private double evaluateExpression(String expr) {
+        return parseAdditionSubtraction(expr);
+    }
+
+    private double parseAdditionSubtraction(String expr) {
+        int parenDepth = 0;
+        for (int i = expr.length() - 1; i >= 0; i--) {
+            char c = expr.charAt(i);
+            if (c == ')')
+                parenDepth++;
+            else if (c == '(')
+                parenDepth--;
+            else if (parenDepth == 0 && (c == '+' || c == '-')) {
+                if (i > 0 && !isOperator(expr.charAt(i - 1))) {
+                    String left = expr.substring(0, i);
+                    String right = expr.substring(i + 1);
+                    if (c == '+') {
+                        return parseAdditionSubtraction(left) + parseMultiplicationDivision(right);
+                    } else {
+                        return parseAdditionSubtraction(left) - parseMultiplicationDivision(right);
+                    }
+                }
+            }
+        }
+        return parseMultiplicationDivision(expr);
+    }
+
+    private double parseMultiplicationDivision(String expr) {
+        for (int i = expr.length() - 1; i >= 0; i--) {
+            char c = expr.charAt(i);
+            if (c == '*' || c == '/') {
+                String left = expr.substring(0, i);
+                String right = expr.substring(i + 1);
+                if (c == '*') {
+                    return parseMultiplicationDivision(left) * parseNumber(right);
+                } else {
+                    return parseMultiplicationDivision(left) / parseNumber(right);
+                }
+            }
+        }
+        return parseNumber(expr);
+    }
+
+    private double parseNumber(String expr) {
+        return Double.parseDouble(expr.trim());
+    }
+
+    private boolean isOperator(char c) {
+        return c == '+' || c == '-' || c == '*' || c == '/';
+    }
+
+    @SuppressLint("SetTextI18n")
+    void calculateResult() {
+        if (expression.length() == 0)
+            return;
+
+        String result = calculateExpression(expression.toString());
+        if (result.isEmpty() || result.equals("Error")) {
+            resultTv.setText("Error");
+            return;
+        }
+
+        setResultMode();
+        resultTv.setText(result);
+        isResultDisplayed = true;
     }
 
     void clear() {
-        solutionTv.setText("");
+        expression = new StringBuilder();
+        solutionTv.setText("0");
         resultTv.setText("0");
-        firstNumber = 0;
-        currentOperator = "";
-        isOperatorPressed = false;
+        isResultDisplayed = false;
+        setInputMode();
     }
 
     void deleteLastChar() {
-        String currentText = resultTv.getText().toString();
-        if (currentText.length() > 1) {
-            resultTv.setText(currentText.substring(0, currentText.length() - 1));
-        } else if (currentText.length() == 1 && !currentText.equals("0")) {
-            resultTv.setText("0");
+        if (expression.length() == 0)
+            return;
+        if (isResultDisplayed) {
+            isResultDisplayed = false;
+            setInputMode();
         }
+
+        String exprStr = expression.toString();
+
+        if (exprStr.endsWith(" + ") || exprStr.endsWith(" − ") ||
+                exprStr.endsWith(" × ") || exprStr.endsWith(" ÷ ")) {
+            expression = new StringBuilder(exprStr.substring(0, exprStr.length() - 3));
+        } else if (exprStr.length() > 0) {
+            expression = new StringBuilder(exprStr.substring(0, exprStr.length() - 1));
+        }
+        updateDisplay();
     }
 }
