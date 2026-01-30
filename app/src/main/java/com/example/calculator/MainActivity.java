@@ -11,11 +11,16 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 public class MainActivity extends AppCompatActivity {
     TextView resultTv, solutionTv;
     String currentOperator = "";
-    double firstNumber = 0;
+    BigDecimal firstNumber = BigDecimal.ZERO;
     boolean isOperatorPressed = false;
+    private static final int SCALE = 20; // Số chữ số thập phân tối đa
+
     Button button_1, button_2, button_3, button_4, button_5,
             button_6, button_7, button_8, button_9, button_0,
             button_add, button_sub, button_mul, button_div,
@@ -50,12 +55,22 @@ public class MainActivity extends AppCompatActivity {
         button_equal = findViewById(R.id.btn_equals);
         button_clear = findViewById(R.id.btn_clear);
         button_delete = findViewById(R.id.btn_delete);
-        button_clear.setOnClickListener(v -> clear());
+        button_dot = findViewById(R.id.btn_dot);
+
         button_delete.setOnClickListener(v -> deleteLastChar());
+
+        button_dot.setOnClickListener(v -> appendDot());
+
+        button_clear.setOnClickListener(v -> clear());
+
         number_button_event();
-
     }
-
+    void appendDot() {
+        String currentText = resultTv.getText().toString();
+        if (!currentText.contains(".")) {
+            resultTv.setText(currentText + ".");
+        }
+    }
     void number_button_event() {
         button_0.setOnClickListener(v -> appendNumber("0"));
         button_1.setOnClickListener(v -> appendNumber("1"));
@@ -79,25 +94,18 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // If an operator was already pressed, calculate the result first
         if (isOperatorPressed && !resultTv.getText().toString().isEmpty()) {
             equal_button_event();
         }
 
-        // Store the first number
         String currentText = resultTv.getText().toString();
         if (!currentText.isEmpty()) {
-            firstNumber = Double.parseDouble(currentText);
+            firstNumber = new BigDecimal(currentText);
         }
 
-        // Store the operator
         currentOperator = operator;
         isOperatorPressed = true;
-
-        // Update the solution TextView to show the expression
         solutionTv.setText(currentText + " " + operator);
-
-        // Clear result for next input
         resultTv.setText("");
     }
 
@@ -106,23 +114,22 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        double secondNumber = Double.parseDouble(resultTv.getText().toString());
-        double result = 0;
+        BigDecimal secondNumber = new BigDecimal(resultTv.getText().toString());
+        BigDecimal result = BigDecimal.ZERO;
 
-        // Perform calculation based on operator
         switch (currentOperator) {
             case "+":
-                result = firstNumber + secondNumber;
+                result = firstNumber.add(secondNumber);
                 break;
             case "-":
-                result = firstNumber - secondNumber;
+                result = firstNumber.subtract(secondNumber);
                 break;
             case "*":
-                result = firstNumber * secondNumber;
+                result = firstNumber.multiply(secondNumber);
                 break;
             case "/":
-                if (secondNumber != 0) {
-                    result = firstNumber / secondNumber;
+                if (secondNumber.compareTo(BigDecimal.ZERO) != 0) {
+                    result = firstNumber.divide(secondNumber, SCALE, RoundingMode.HALF_UP);
                 } else {
                     resultTv.setText("Error");
                     solutionTv.setText("");
@@ -133,20 +140,18 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
 
-        // Update the solution TextView with complete expression
-        solutionTv.setText(firstNumber + " " + currentOperator + " " + secondNumber + " =");
+        solutionTv.setText(firstNumber.toPlainString() + " " + currentOperator + " " + secondNumber.toPlainString() + " =");
+        resultTv.setText(formatResult(result));
 
-        // Display result (remove decimal if it's a whole number)
-        if (result == (long) result) {
-            resultTv.setText(String.valueOf((long) result));
-        } else {
-            resultTv.setText(String.valueOf(result));
-        }
-
-        // Reset state
         firstNumber = result;
         currentOperator = "";
         isOperatorPressed = false;
+    }
+
+
+    private String formatResult(BigDecimal result) {
+        result = result.stripTrailingZeros();
+        return result.toPlainString();
     }
 
     @SuppressLint("SetTextI18n")
@@ -154,7 +159,6 @@ public class MainActivity extends AppCompatActivity {
         String currentText = resultTv.getText().toString();
         if (currentText.equals("0")) {
             resultTv.setText(number);
-
         } else {
             resultTv.setText(currentText + number);
         }
@@ -163,7 +167,7 @@ public class MainActivity extends AppCompatActivity {
     void clear() {
         solutionTv.setText("");
         resultTv.setText("0");
-        firstNumber = 0;
+        firstNumber = BigDecimal.ZERO;
         currentOperator = "";
         isOperatorPressed = false;
     }
