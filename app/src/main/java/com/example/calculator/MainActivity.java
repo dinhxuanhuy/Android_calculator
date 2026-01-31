@@ -12,17 +12,29 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 public class MainActivity extends AppCompatActivity {
+    // ==================== UI Components ====================
     TextView resultTv, solutionTv;
     Button button_1, button_2, button_3, button_4, button_5,
             button_6, button_7, button_8, button_9, button_0,
             button_add, button_sub, button_mul, button_div,
             button_equal, button_clear, button_dot, button_delete;
 
+    // ==================== State Variables ====================
     private StringBuilder expression = new StringBuilder();
     private boolean isResultDisplayed = false;
+
+    // ==================== Constants ====================
     private static final float SIZE_LARGE = 83f;
     private static final float SIZE_SMALL = 36f;
+
+    // BigDecimal Calculation Settings
+    private static final int CALCULATION_SCALE = 15; // Internal precision for calculations
+    private static final int DISPLAY_SCALE = 10; // Max decimal places for display
+    private static final RoundingMode ROUNDING_MODE = RoundingMode.HALF_UP;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +46,16 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        initializeViews();
+        setupButtonListeners();
+        initializeDisplay();
+    }
+
+    /**
+     * Initialize all UI view references
+     */
+    private void initializeViews() {
         resultTv = findViewById(R.id.tv_result);
         solutionTv = findViewById(R.id.tv_history);
         button_0 = findViewById(R.id.btn_0);
@@ -53,16 +75,16 @@ public class MainActivity extends AppCompatActivity {
         button_equal = findViewById(R.id.btn_equals);
         button_clear = findViewById(R.id.btn_clear);
         button_delete = findViewById(R.id.btn_delete);
-        button_clear.setOnClickListener(v -> clear());
-        button_delete.setOnClickListener(v -> deleteLastChar());
-        number_button_event();
-
-        setInputMode();
-        solutionTv.setText("");
-        resultTv.setText("");
     }
 
-    void number_button_event() {
+    /**
+     * Setup all button click listeners
+     */
+    private void setupButtonListeners() {
+        button_clear.setOnClickListener(v -> clear());
+        button_delete.setOnClickListener(v -> deleteLastChar());
+
+        // Number buttons
         button_0.setOnClickListener(v -> appendToExpression("0"));
         button_1.setOnClickListener(v -> appendToExpression("1"));
         button_2.setOnClickListener(v -> appendToExpression("2"));
@@ -73,12 +95,27 @@ public class MainActivity extends AppCompatActivity {
         button_7.setOnClickListener(v -> appendToExpression("7"));
         button_8.setOnClickListener(v -> appendToExpression("8"));
         button_9.setOnClickListener(v -> appendToExpression("9"));
+
+        // Operator buttons
         button_add.setOnClickListener(v -> appendToExpression(" + "));
         button_sub.setOnClickListener(v -> appendToExpression(" − "));
         button_mul.setOnClickListener(v -> appendToExpression(" × "));
         button_div.setOnClickListener(v -> appendToExpression(" ÷ "));
+
+        // Equal button
         button_equal.setOnClickListener(v -> calculateResult());
     }
+
+    /**
+     * Initialize display state
+     */
+    private void initializeDisplay() {
+        setInputMode();
+        solutionTv.setText("");
+        resultTv.setText("");
+    }
+
+    // ==================== UI Mode Management ====================
 
     private void setInputMode() {
         solutionTv.setTextSize(TypedValue.COMPLEX_UNIT_SP, SIZE_LARGE);
@@ -93,6 +130,8 @@ public class MainActivity extends AppCompatActivity {
         resultTv.setTextSize(TypedValue.COMPLEX_UNIT_SP, SIZE_LARGE);
         resultTv.setTextColor(0xFFFFFFFF); // White
     }
+
+    // ==================== Expression Input Handling ====================
 
     @SuppressLint("SetTextI18n")
     void appendToExpression(String value) {
@@ -131,50 +170,93 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("SetTextI18n")
     private void updateDisplay() {
         solutionTv.setText(expression.toString());
-
         String result = calculateExpression(expression.toString());
         resultTv.setText(result);
     }
 
+    // ==================== Calculation Engine (BigDecimal) ====================
+
+    /**
+     * Main entry point for expression calculation
+     * Preserves original UI logic while using BigDecimal internally
+     */
     private String calculateExpression(String expr) {
         if (expr.isEmpty())
             return "";
 
         try {
-            String calcExpr = expr.replace(" + ", "+")
-                    .replace(" − ", "-")
-                    .replace(" × ", "*")
-                    .replace(" ÷ ", "/")
-                    .trim();
+            // Convert display operators to calculation operators
+            String calcExpr = normalizeExpression(expr);
 
-            if (calcExpr.endsWith("+") || calcExpr.endsWith("-") ||
-                    calcExpr.endsWith("*") || calcExpr.endsWith("/")) {
-                calcExpr = calcExpr.substring(0, calcExpr.length() - 1);
-            }
+            // Remove trailing operator if present
+            calcExpr = removeTrailingOperator(calcExpr);
 
             if (calcExpr.isEmpty())
                 return "";
 
-            double result = evaluateExpression(calcExpr);
+            // Evaluate using BigDecimal
+            BigDecimal result = evaluateExpression(calcExpr);
 
-            if (Double.isInfinite(result) || Double.isNaN(result)) {
-                return "Error";
-            }
-            if (result == (long) result) {
-                return String.valueOf((long) result);
-            } else {
-                return String.valueOf(result);
-            }
+            // Format result for display
+            return formatResult(result);
+
+        } catch (ArithmeticException e) {
+            // Handle division by zero or other arithmetic errors
+            return "Error";
         } catch (Exception e) {
             return "";
         }
     }
 
-    private double evaluateExpression(String expr) {
+    /**
+     * Normalize expression: convert display operators to calculation operators
+     */
+    private String normalizeExpression(String expr) {
+        return expr.replace(" + ", "+")
+                .replace(" − ", "-")
+                .replace(" × ", "*")
+                .replace(" ÷ ", "/")
+                .trim();
+    }
+
+    /**
+     * Remove trailing operator from expression
+     */
+    private String removeTrailingOperator(String calcExpr) {
+        if (calcExpr.endsWith("+") || calcExpr.endsWith("-") ||
+                calcExpr.endsWith("*") || calcExpr.endsWith("/")) {
+            return calcExpr.substring(0, calcExpr.length() - 1);
+        }
+        return calcExpr;
+    }
+
+    /**
+     * Format BigDecimal result for clean display
+     * Uses stripTrailingZeros() to show "5" instead of "5.0000"
+     */
+    private String formatResult(BigDecimal result) {
+        // Round to display scale
+        BigDecimal rounded = result.setScale(DISPLAY_SCALE, ROUNDING_MODE);
+
+        // Strip trailing zeros for clean display
+        BigDecimal stripped = rounded.stripTrailingZeros();
+
+        // Use toPlainString() to avoid scientific notation (e.g., "1E+1" -> "10")
+        return stripped.toPlainString();
+    }
+
+    /**
+     * Main expression evaluator - entry point for recursive descent parser
+     */
+    private BigDecimal evaluateExpression(String expr) {
         return parseAdditionSubtraction(expr);
     }
 
-    private double parseAdditionSubtraction(String expr) {
+    /**
+     * Parse addition and subtraction (lowest precedence)
+     * Scans from right to left to handle left-to-right associativity
+     */
+    private BigDecimal parseAdditionSubtraction(String expr) {
         int parenDepth = 0;
         for (int i = expr.length() - 1; i >= 0; i--) {
             char c = expr.charAt(i);
@@ -186,10 +268,14 @@ public class MainActivity extends AppCompatActivity {
                 if (i > 0 && !isOperator(expr.charAt(i - 1))) {
                     String left = expr.substring(0, i);
                     String right = expr.substring(i + 1);
+
+                    BigDecimal leftValue = parseAdditionSubtraction(left);
+                    BigDecimal rightValue = parseMultiplicationDivision(right);
+
                     if (c == '+') {
-                        return parseAdditionSubtraction(left) + parseMultiplicationDivision(right);
+                        return leftValue.add(rightValue);
                     } else {
-                        return parseAdditionSubtraction(left) - parseMultiplicationDivision(right);
+                        return leftValue.subtract(rightValue);
                     }
                 }
             }
@@ -197,29 +283,47 @@ public class MainActivity extends AppCompatActivity {
         return parseMultiplicationDivision(expr);
     }
 
-    private double parseMultiplicationDivision(String expr) {
+    /**
+     * Parse multiplication and division (higher precedence)
+     * Scans from right to left to handle left-to-right associativity
+     */
+    private BigDecimal parseMultiplicationDivision(String expr) {
         for (int i = expr.length() - 1; i >= 0; i--) {
             char c = expr.charAt(i);
             if (c == '*' || c == '/') {
                 String left = expr.substring(0, i);
                 String right = expr.substring(i + 1);
+
+                BigDecimal leftValue = parseMultiplicationDivision(left);
+                BigDecimal rightValue = parseNumber(right);
+
                 if (c == '*') {
-                    return parseMultiplicationDivision(left) * parseNumber(right);
+                    return leftValue.multiply(rightValue);
                 } else {
-                    return parseMultiplicationDivision(left) / parseNumber(right);
+                    // Use divide with scale and rounding mode to handle infinite decimals
+                    // Example: 1/3 = 0.333... won't crash
+                    return leftValue.divide(rightValue, CALCULATION_SCALE, ROUNDING_MODE);
                 }
             }
         }
         return parseNumber(expr);
     }
 
-    private double parseNumber(String expr) {
-        return Double.parseDouble(expr.trim());
+    /**
+     * Parse a number string to BigDecimal
+     */
+    private BigDecimal parseNumber(String expr) {
+        return new BigDecimal(expr.trim());
     }
 
+    /**
+     * Check if character is an operator
+     */
     private boolean isOperator(char c) {
         return c == '+' || c == '-' || c == '*' || c == '/';
     }
+
+    // ==================== User Actions ====================
 
     @SuppressLint("SetTextI18n")
     void calculateResult() {
