@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Dark Theme -->
+    <style name="Theme.SuperApp" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryVariant">@color/primary_dark</item>
+        <item name="colorOnPrimary">@color/on_primary</item>
+        <item name="colorSecondary">@color/secondary</item>
+        <item name="colorSecondaryVariant">@color/secondary_variant</item>
+        <item name="colorOnSecondary">@color/on_secondary</item>
+        <item name="android:colorBackground">@color/screen_bg</item>
+        <item name="colorOnBackground">@color/white</item>
+        <item name="colorSurface">@color/screen_bg</item>
+        <item name="colorOnSurface">@color/white</item>
+        <item name="colorError">@color/error</item>
+        <item name="colorOnError">@color/on_error</item>
+    </style>
+
+    <style name="Theme.SuperApp.Calculator" parent="Theme.SuperApp" />
+
+    <style name="Theme.SuperApp.Auth" parent="Theme.SuperApp" />
+
+</resources>

@@ -19,5 +19,16 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Calculator"
+rootProject.name = "SuperApp"
+
+// Main Application Module
 include(":app")
+
+// Core Modules
+include(":core")
+include(":core-ui")
+
+// Feature Modules
+include(":feature-auth")
+include(":feature-calculator")
+

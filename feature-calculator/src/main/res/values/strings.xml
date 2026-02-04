@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Calculator Module Strings -->
+    <string name="calculator_title">Calculator</string>
+    <string name="clear">Clear</string>
+    <string name="delete">Delete</string>
+    <string name="equals">Equals</string>
+    <string name="error">Error</string>
+    <string name="divide_by_zero">Cannot divide by zero</string>
+</resources>

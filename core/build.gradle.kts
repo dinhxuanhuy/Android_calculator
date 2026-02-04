@@ -1,20 +1,16 @@
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.google.gms.google.services)
+    alias(libs.plugins.android.library)
 }
 
 android {
-    namespace = "com.example.superapp"
+    namespace = "com.example.superapp.core"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.superapp"
         minSdk = 24
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {
@@ -33,24 +29,10 @@ android {
 }
 
 dependencies {
-    // Project modules
-    implementation(project(":core"))
-    implementation(project(":core-ui"))
-    implementation(project(":feature-auth"))
-    implementation(project(":feature-calculator"))
-
-    // AndroidX
     implementation(libs.appcompat)
     implementation(libs.material)
-    implementation(libs.activity)
-    implementation(libs.constraintlayout)
     implementation(libs.core.ktx)
 
-    // Firebase
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.auth)
-
-    // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

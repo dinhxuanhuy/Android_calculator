@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Auth Module Strings -->
+    <string name="welcome_message">Welcome to SuperApp</string>
+    <string name="email_hint">Email</string>
+    <string name="password_hint">Password</string>
+    <string name="sign_in">Sign In</string>
+    <string name="register_prompt">Don\'t have an account? Sign up here</string>
+    <string name="create_account">Create Account</string>
+    <string name="full_name_hint">Full Name</string>
+    <string name="confirm_password_hint">Confirm Password</string>
+    <string name="terms_agreement">I agree to the Terms and Conditions</string>
+    <string name="email_required">Email is required</string>
+    <string name="password_required">Password is required</string>
+    <string name="name_required">Name is required</string>
+    <string name="password_min_length">Password must be at least 6 characters</string>
+    <string name="passwords_not_match">Passwords do not match</string>
+    <string name="agree_terms">Please agree to the Terms and Conditions</string>
+    <string name="auth_success">Authentication success</string>
+    <string name="auth_failed">Authentication failed</string>
+    <string name="registration_success">Registration successful</string>
+    <string name="registration_failed">Registration failed</string>
+</resources>

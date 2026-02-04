@@ -1,4 +1,4 @@
-package com.example.calculator;
+package com.example.superapp.feature.calculator.presentation;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
@@ -11,7 +11,9 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class MainActivity extends AppCompatActivity {
+import com.example.superapp.feature.calculator.R;
+
+public class CalculatorActivity extends AppCompatActivity {
     TextView resultTv, solutionTv;
     String currentOperator = "";
     double firstNumber = 0;
@@ -25,12 +27,18 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_calculator);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        initViews();
+        setupClickListeners();
+    }
+
+    private void initViews() {
         resultTv = findViewById(R.id.tv_result);
         solutionTv = findViewById(R.id.tv_history);
         button_0 = findViewById(R.id.btn_0);
@@ -50,13 +58,15 @@ public class MainActivity extends AppCompatActivity {
         button_equal = findViewById(R.id.btn_equals);
         button_clear = findViewById(R.id.btn_clear);
         button_delete = findViewById(R.id.btn_delete);
-        button_clear.setOnClickListener(v -> clear());
-        button_delete.setOnClickListener(v -> deleteLastChar());
-        number_button_event();
-
     }
 
-    void number_button_event() {
+    private void setupClickListeners() {
+        button_clear.setOnClickListener(v -> clear());
+        button_delete.setOnClickListener(v -> deleteLastChar());
+        setupNumberButtons();
+    }
+
+    void setupNumberButtons() {
         button_0.setOnClickListener(v -> appendNumber("0"));
         button_1.setOnClickListener(v -> appendNumber("1"));
         button_2.setOnClickListener(v -> appendNumber("2"));
@@ -67,21 +77,21 @@ public class MainActivity extends AppCompatActivity {
         button_7.setOnClickListener(v -> appendNumber("7"));
         button_8.setOnClickListener(v -> appendNumber("8"));
         button_9.setOnClickListener(v -> appendNumber("9"));
-        button_add.setOnClickListener(v -> operator_button_event("+"));
-        button_sub.setOnClickListener(v -> operator_button_event("-"));
-        button_mul.setOnClickListener(v -> operator_button_event("*"));
-        button_div.setOnClickListener(v -> operator_button_event("/"));
-        button_equal.setOnClickListener(v -> equal_button_event());
+        button_add.setOnClickListener(v -> operatorButtonEvent("+"));
+        button_sub.setOnClickListener(v -> operatorButtonEvent("-"));
+        button_mul.setOnClickListener(v -> operatorButtonEvent("*"));
+        button_div.setOnClickListener(v -> operatorButtonEvent("/"));
+        button_equal.setOnClickListener(v -> equalButtonEvent());
     }
 
-    void operator_button_event(String operator) {
+    void operatorButtonEvent(String operator) {
         if (resultTv.getText().toString().isEmpty()) {
             return;
         }
 
         // If an operator was already pressed, calculate the result first
         if (isOperatorPressed && !resultTv.getText().toString().isEmpty()) {
-            equal_button_event();
+            equalButtonEvent();
         }
 
         // Store the first number
@@ -101,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
         resultTv.setText("");
     }
 
-    void equal_button_event() {
+    void equalButtonEvent() {
         if (currentOperator.isEmpty() || resultTv.getText().toString().isEmpty()) {
             return;
         }
@@ -154,7 +164,6 @@ public class MainActivity extends AppCompatActivity {
         String currentText = resultTv.getText().toString();
         if (currentText.equals("0")) {
             resultTv.setText(number);
-
         } else {
             resultTv.setText(currentText + number);
         }

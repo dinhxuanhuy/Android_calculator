@@ -1,20 +1,16 @@
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.google.gms.google.services)
+    alias(libs.plugins.android.library)
 }
 
 android {
-    namespace = "com.example.superapp"
+    namespace = "com.example.superapp.feature.auth"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.superapp"
         minSdk = 24
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {
@@ -30,14 +26,15 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+    buildFeatures {
+        viewBinding = true
+    }
 }
 
 dependencies {
     // Project modules
     implementation(project(":core"))
     implementation(project(":core-ui"))
-    implementation(project(":feature-auth"))
-    implementation(project(":feature-calculator"))
 
     // AndroidX
     implementation(libs.appcompat)
@@ -45,6 +42,9 @@ dependencies {
     implementation(libs.activity)
     implementation(libs.constraintlayout)
     implementation(libs.core.ktx)
+    implementation(libs.annotation)
+    implementation(libs.lifecycle.livedata.ktx)
+    implementation(libs.lifecycle.viewmodel.ktx)
 
     // Firebase
     implementation(platform(libs.firebase.bom))
