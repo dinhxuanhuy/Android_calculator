@@ -1,11 +1,13 @@
 package com.example.superapp;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
 import com.example.superapp.core.base.BaseActivity;
 import com.example.superapp.core.navigation.NavigationManager;
+import com.example.superapp.core.utils.Constants;
 import com.example.superapp.feature.auth.data.AuthRepository;
 import com.example.superapp.feature.auth.data.model.LoggedInUser;
 import com.google.android.material.card.MaterialCardView;
@@ -68,7 +70,12 @@ public class DashboardActivity extends BaseActivity {
     }
 
     private void logout() {
+        // Clear Firebase auth
         authRepository.logout();
+        // Clear SharedPreferences login state
+        SharedPreferences prefs = getSharedPreferences(Constants.PREF_NAME, MODE_PRIVATE);
+        prefs.edit().clear().apply();
+        // Navigate back to Login
         NavigationManager.navigateToLogin(this);
         finish();
     }
