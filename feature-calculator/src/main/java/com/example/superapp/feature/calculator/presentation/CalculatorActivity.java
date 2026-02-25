@@ -1,6 +1,5 @@
 package com.example.superapp.feature.calculator.presentation;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
@@ -13,22 +12,19 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.superapp.core.base.BaseActivity;
 import com.example.superapp.feature.calculator.R;
+import com.example.superapp.feature.calculator.logic.CalculatorEngine;
 
 /**
  * Calculator Mini-App.
  *
- * Implements standard operations (+, -, *, /), decimal point,
- * clear (C), delete (backspace), and chained operations.
- * Handles edge cases: division by zero, double-dot, "Error" state recovery.
+ * All computation is delegated to {@link CalculatorEngine} (pure Java, no Android deps).
+ * This keeps the Activity thin and allows the engine to be unit-tested on the JVM.
  * Uses Neumorphic design styling from :core-ui.
  */
 public class CalculatorActivity extends BaseActivity {
 
     private TextView resultTv, solutionTv;
-    private String currentOperator = "";
-    private double firstNumber = 0;
-    private boolean isOperatorPressed = false;
-    private boolean isResultDisplayed = false;
+    private final CalculatorEngine engine = new CalculatorEngine();
 
     private Button button_1, button_2, button_3, button_4, button_5,
             button_6, button_7, button_8, button_9, button_0,
@@ -76,219 +72,49 @@ public class CalculatorActivity extends BaseActivity {
 
     private void setupClickListeners() {
         // Utility buttons
-        button_clear.setOnClickListener(v -> clear());
-        button_delete.setOnClickListener(v -> deleteLastChar());
+        button_clear.setOnClickListener(v -> applyState(engine.clear()));
+        button_delete.setOnClickListener(v -> applyState(engine.pressDelete()));
 
         // Decimal point
-        button_dot.setOnClickListener(v -> appendDot());
+        button_dot.setOnClickListener(v -> applyState(engine.appendDot()));
 
         // Number buttons
-        button_0.setOnClickListener(v -> appendNumber("0"));
-        button_1.setOnClickListener(v -> appendNumber("1"));
-        button_2.setOnClickListener(v -> appendNumber("2"));
-        button_3.setOnClickListener(v -> appendNumber("3"));
-        button_4.setOnClickListener(v -> appendNumber("4"));
-        button_5.setOnClickListener(v -> appendNumber("5"));
-        button_6.setOnClickListener(v -> appendNumber("6"));
-        button_7.setOnClickListener(v -> appendNumber("7"));
-        button_8.setOnClickListener(v -> appendNumber("8"));
-        button_9.setOnClickListener(v -> appendNumber("9"));
+        button_0.setOnClickListener(v -> applyState(engine.appendDigit("0")));
+        button_1.setOnClickListener(v -> applyState(engine.appendDigit("1")));
+        button_2.setOnClickListener(v -> applyState(engine.appendDigit("2")));
+        button_3.setOnClickListener(v -> applyState(engine.appendDigit("3")));
+        button_4.setOnClickListener(v -> applyState(engine.appendDigit("4")));
+        button_5.setOnClickListener(v -> applyState(engine.appendDigit("5")));
+        button_6.setOnClickListener(v -> applyState(engine.appendDigit("6")));
+        button_7.setOnClickListener(v -> applyState(engine.appendDigit("7")));
+        button_8.setOnClickListener(v -> applyState(engine.appendDigit("8")));
+        button_9.setOnClickListener(v -> applyState(engine.appendDigit("9")));
 
         // Operator buttons
-        button_add.setOnClickListener(v -> operatorButtonEvent("+"));
-        button_sub.setOnClickListener(v -> operatorButtonEvent("-"));
-        button_mul.setOnClickListener(v -> operatorButtonEvent("*"));
-        button_div.setOnClickListener(v -> operatorButtonEvent("/"));
+        button_add.setOnClickListener(v -> applyState(engine.pressOperator("+")));
+        button_sub.setOnClickListener(v -> applyState(engine.pressOperator("-")));
+        button_mul.setOnClickListener(v -> applyState(engine.pressOperator("*")));
+        button_div.setOnClickListener(v -> applyState(engine.pressOperator("/")));
 
         // Equals
-        button_equal.setOnClickListener(v -> equalButtonEvent());
-    }
-
-    // ==================== NUMBER & DOT INPUT ====================
-
-    @SuppressLint("SetTextI18n")
-    private void appendNumber(String number) {
-        // If error is displayed or result was just shown, start fresh input
-        if (isErrorState() || isResultDisplayed) {
-            resultTv.setText(number);
-            isResultDisplayed = false;
-            return;
-        }
-
-        String currentText = resultTv.getText().toString();
-        if (currentText.equals("0")) {
-            resultTv.setText(number);
-        } else {
-            resultTv.setText(currentText + number);
-        }
-    }
-
-    @SuppressLint("SetTextI18n")
-    private void appendDot() {
-        if (isErrorState()) {
-            resultTv.setText("0.");
-            return;
-        }
-
-        if (isResultDisplayed) {
-            resultTv.setText("0.");
-            isResultDisplayed = false;
-            return;
-        }
-
-        String currentText = resultTv.getText().toString();
-
-        // Prevent double dot: "3.14." is invalid
-        if (currentText.contains(".")) {
-            return;
-        }
-
-        resultTv.setText(currentText + ".");
-    }
-
-    // ==================== OPERATOR ====================
-
-    private void operatorButtonEvent(String operator) {
-        String currentText = resultTv.getText().toString();
-        if (currentText.isEmpty() || isErrorState()) {
-            return;
-        }
-
-        // If an operator was already pressed, chain-calculate first
-        if (isOperatorPressed && !currentText.isEmpty()) {
-            equalButtonEvent();
-            // After chained calculation, the result is now in resultTv
-            currentText = resultTv.getText().toString();
-            if (isErrorState()) return;
-        }
-
-        try {
-            firstNumber = Double.parseDouble(currentText);
-        } catch (NumberFormatException e) {
-            return;
-        }
-
-        currentOperator = operator;
-        isOperatorPressed = true;
-        isResultDisplayed = false;
-
-        // Show expression in history
-        solutionTv.setText(formatNumber(firstNumber) + " " + getDisplayOperator(operator));
-
-        // Clear result for next input
-        resultTv.setText("");
-    }
-
-    // ==================== EQUALS ====================
-
-    private void equalButtonEvent() {
-        String currentText = resultTv.getText().toString();
-        if (currentOperator.isEmpty() || currentText.isEmpty() || isErrorState()) {
-            return;
-        }
-
-        double secondNumber;
-        try {
-            secondNumber = Double.parseDouble(currentText);
-        } catch (NumberFormatException e) {
-            return;
-        }
-
-        double result = 0;
-
-        switch (currentOperator) {
-            case "+":
-                result = firstNumber + secondNumber;
-                break;
-            case "-":
-                result = firstNumber - secondNumber;
-                break;
-            case "*":
-                result = firstNumber * secondNumber;
-                break;
-            case "/":
-                if (secondNumber == 0) {
-                    // Division by zero → show error gracefully
-                    solutionTv.setText(formatNumber(firstNumber) + " ÷ 0");
-                    resultTv.setText(getString(R.string.error));
-                    Toast.makeText(this, R.string.divide_by_zero, Toast.LENGTH_SHORT).show();
-                    currentOperator = "";
-                    isOperatorPressed = false;
-                    isResultDisplayed = false;
-                    return;
-                }
-                result = firstNumber / secondNumber;
-                break;
-        }
-
-        // Show full expression in history
-        solutionTv.setText(formatNumber(firstNumber) + " "
-                + getDisplayOperator(currentOperator) + " "
-                + formatNumber(secondNumber) + " =");
-
-        // Display result
-        resultTv.setText(formatNumber(result));
-
-        // Prepare for chaining: store result as firstNumber
-        firstNumber = result;
-        currentOperator = "";
-        isOperatorPressed = false;
-        isResultDisplayed = true;
-    }
-
-    // ==================== CLEAR & DELETE ====================
-
-    private void clear() {
-        solutionTv.setText("");
-        resultTv.setText("0");
-        firstNumber = 0;
-        currentOperator = "";
-        isOperatorPressed = false;
-        isResultDisplayed = false;
-    }
-
-    private void deleteLastChar() {
-        if (isErrorState()) {
-            clear();
-            return;
-        }
-        String currentText = resultTv.getText().toString();
-        if (currentText.length() > 1) {
-            resultTv.setText(currentText.substring(0, currentText.length() - 1));
-        } else if (currentText.length() == 1 && !currentText.equals("0")) {
-            resultTv.setText("0");
-        }
-    }
-
-    // ==================== HELPERS ====================
-
-    /**
-     * Check if the display currently shows an error state.
-     */
-    private boolean isErrorState() {
-        String text = resultTv.getText().toString();
-        return text.equals(getString(R.string.error)) || text.equalsIgnoreCase("Error");
+        button_equal.setOnClickListener(v -> {
+            CalculatorEngine.State state = engine.pressEquals();
+            applyState(state);
+            if (state.isError) {
+                Toast.makeText(this, R.string.divide_by_zero, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     /**
-     * Format a number for display: remove trailing ".0" for whole numbers.
+     * Apply engine state to the UI views.
+     *
+     * When the engine clears the display (operator just pressed, awaiting next digit),
+     * show "0" as a placeholder rather than an empty string.
      */
-    private String formatNumber(double number) {
-        if (number == (long) number) {
-            return String.valueOf((long) number);
-        }
-        return String.valueOf(number);
-    }
-
-    /**
-     * Return the display symbol for an operator (e.g. "/" → "÷", "*" → "×").
-     */
-    private String getDisplayOperator(String operator) {
-        switch (operator) {
-            case "/": return "÷";
-            case "*": return "×";
-            case "-": return "−";
-            default:  return operator;
-        }
+    private void applyState(CalculatorEngine.State state) {
+        solutionTv.setText(state.history);
+        String display = state.display.isEmpty() ? "0" : state.display;
+        resultTv.setText(display);
     }
 }
