@@ -9,7 +9,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Welcome to SuperApp"
+        android:text="@string/welcome_message"
         android:textSize="@dimen/text_size_xxl"
         android:textColor="@color/text_primary"
         android:layout_marginBottom="@dimen/spacing_xl" />
@@ -24,7 +24,7 @@
             android:id="@+id/username"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Email"
+            android:hint="@string/email_hint"
             android:inputType="textEmailAddress" />
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -41,7 +41,7 @@
             android:id="@+id/password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Password"
+            android:hint="@string/password_hint"
             android:inputType="textPassword" />
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -50,7 +50,7 @@
         android:id="@+id/login"
         android:layout_width="match_parent"
         android:layout_height="@dimen/button_height_large"
-        android:text="Sign In"
+        android:text="@string/sign_in"
         android:layout_marginBottom="@dimen/spacing_md"
         style="@style/Widget.Material3.Button" />
 
@@ -65,7 +65,7 @@
         android:id="@+id/tvRegister"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Don't have an account? Sign up here"
+        android:text="@string/register_prompt"
         android:textColor="@color/primary"
         android:layout_marginTop="@dimen/spacing_lg"
         android:clickable="true"

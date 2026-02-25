@@ -22,7 +22,7 @@
                 android:id="@+id/tvWelcome"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Welcome to SuperApp!"
+                android:text="@string/welcome_to_superapp"
                 android:textSize="@dimen/text_size_xxl"
                 android:textColor="@color/text_primary"
                 android:textStyle="bold"
@@ -32,7 +32,7 @@
                 android:id="@+id/tvEmail"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="user@example.com"
+                android:text=""
                 android:textSize="@dimen/text_size_md"
                 android:textColor="@color/text_secondary" />
 
@@ -42,7 +42,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Available Apps"
+            android:text="@string/available_apps"
             android:textSize="@dimen/text_size_lg"
             android:textColor="@color/text_primary"
             android:textStyle="bold"
@@ -70,7 +70,7 @@
                     android:layout_width="@dimen/icon_size_xl"
                     android:layout_height="@dimen/icon_size_xl"
                     android:src="@drawable/ic_calculator"
-                    android:contentDescription="Calculator"
+                    android:contentDescription="@string/calculator_title"
                     android:layout_marginEnd="@dimen/spacing_md"
                     android:tint="@color/primary" />
 
@@ -83,7 +83,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Calculator"
+                        android:text="@string/calculator_title"
                         android:textSize="@dimen/text_size_lg"
                         android:textColor="@color/text_primary"
                         android:textStyle="bold" />
@@ -91,7 +91,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Perform mathematical calculations"
+                        android:text="@string/calculator_description"
                         android:textSize="@dimen/text_size_sm"
                         android:textColor="@color/text_secondary" />
 
@@ -101,7 +101,7 @@
                     android:layout_width="@dimen/icon_size_md"
                     android:layout_height="@dimen/icon_size_md"
                     android:src="@drawable/ic_arrow_forward"
-                    android:contentDescription="Open Calculator"
+                    android:contentDescription="@string/open_calculator"
                     android:tint="@color/text_secondary" />
 
             </LinearLayout>
@@ -127,7 +127,7 @@
                     android:layout_width="@dimen/icon_size_xl"
                     android:layout_height="@dimen/icon_size_xl"
                     android:src="@drawable/ic_more_apps"
-                    android:contentDescription="More Apps"
+                    android:contentDescription="@string/more_apps"
                     android:layout_marginEnd="@dimen/spacing_md"
                     android:tint="@color/text_hint" />
 
@@ -140,7 +140,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="More Apps"
+                        android:text="@string/more_apps"
                         android:textSize="@dimen/text_size_lg"
                         android:textColor="@color/text_hint"
                         android:textStyle="bold" />
@@ -148,7 +148,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Coming soon..."
+                        android:text="@string/coming_soon"
                         android:textSize="@dimen/text_size_sm"
                         android:textColor="@color/text_hint" />
 
@@ -181,14 +181,14 @@
                     android:layout_width="@dimen/icon_size_md"
                     android:layout_height="@dimen/icon_size_md"
                     android:src="@drawable/ic_logout"
-                    android:contentDescription="Logout"
+                    android:contentDescription="@string/logout"
                     android:layout_marginEnd="@dimen/spacing_md"
                     android:tint="@color/error" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Logout"
+                    android:text="@string/logout"
                     android:textSize="@dimen/text_size_md"
                     android:textColor="@color/error" />
 

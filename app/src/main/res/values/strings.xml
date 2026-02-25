@@ -3,11 +3,13 @@
     <!-- App Module Strings -->
     <string name="app_name">SuperApp</string>
     <string name="welcome_to_superapp">Welcome to SuperApp!</string>
+    <string name="welcome_user">Welcome, %1$s!</string>
     <string name="available_apps">Available Apps</string>
     <string name="calculator_title">Calculator</string>
     <string name="calculator_description">Perform mathematical calculations</string>
     <string name="more_apps">More Apps</string>
-    <string name="coming_soon">Coming soon...</string>
+    <string name="coming_soon">Coming soon\u2026</string>
     <string name="logout">Logout</string>
-    <string name="welcome_user">Welcome, %1$s!</string>
+    <string name="logged_out">Logged out successfully</string>
+    <string name="open_calculator">Open Calculator</string>
 </resources>

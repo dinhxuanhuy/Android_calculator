@@ -1,23 +1,26 @@
 package com.example.superapp;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.superapp.core.base.BaseActivity;
 import com.example.superapp.core.navigation.NavigationManager;
-import com.example.superapp.core.utils.Constants;
-import com.example.superapp.feature.auth.data.AuthRepository;
-import com.example.superapp.feature.auth.data.model.LoggedInUser;
 import com.google.android.material.card.MaterialCardView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 /**
- * Dashboard showing available mini-apps and user information
+ * Dashboard Activity — the mini-app container / central hub.
+ *
+ * Responsibilities:
+ * - Header: show welcome message + email from Firebase Auth
+ * - Mini-App Grid: clickable Calculator card → launches CalculatorActivity via NavigationManager
+ * - Coming Soon: visually dimmed placeholder card
+ * - Logout: signs out from Firebase, clears backstack, returns to LoginActivity
  */
 public class DashboardActivity extends BaseActivity {
 
-    private AuthRepository authRepository;
     private TextView tvWelcome, tvEmail;
     private MaterialCardView cardCalculator, cardLogout;
 
@@ -25,8 +28,6 @@ public class DashboardActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
-
-        authRepository = AuthRepository.getInstance();
 
         initViews();
         setupUserInfo();
@@ -40,42 +41,46 @@ public class DashboardActivity extends BaseActivity {
         cardLogout = findViewById(R.id.cardLogout);
     }
 
+    /**
+     * Fetch Display Name and Email directly from FirebaseAuth.
+     */
     private void setupUserInfo() {
-        LoggedInUser currentUser = authRepository.getCurrentUser();
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser != null) {
             String displayName = currentUser.getDisplayName();
+            String email = currentUser.getEmail();
+
             if (displayName != null && !displayName.isEmpty()) {
-                tvWelcome.setText("Welcome, " + displayName + "!");
+                tvWelcome.setText(getString(R.string.welcome_user, displayName));
             } else {
-                tvWelcome.setText("Welcome to SuperApp!");
+                tvWelcome.setText(getString(R.string.welcome_to_superapp));
             }
-            tvEmail.setText(currentUser.getEmail());
+
+            if (email != null) {
+                tvEmail.setText(email);
+            }
+        } else {
+            tvWelcome.setText(getString(R.string.welcome_to_superapp));
+            tvEmail.setText("");
         }
     }
 
     private void setupClickListeners() {
-        cardCalculator.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                NavigationManager.navigateToCalculator(DashboardActivity.this);
-            }
-        });
+        // Calculator card → open CalculatorActivity via NavigationManager (Reflection)
+        cardCalculator.setOnClickListener(v ->
+                NavigationManager.navigateToCalculator(DashboardActivity.this)
+        );
 
-        cardLogout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                logout();
-            }
-        });
+        // Logout card → sign out and redirect to Login
+        cardLogout.setOnClickListener(v -> logout());
     }
 
+    /**
+     * Sign out from Firebase Auth and redirect to LoginActivity, clearing the entire backstack.
+     */
     private void logout() {
-        // Clear Firebase auth
-        authRepository.logout();
-        // Clear SharedPreferences login state
-        SharedPreferences prefs = getSharedPreferences(Constants.PREF_NAME, MODE_PRIVATE);
-        prefs.edit().clear().apply();
-        // Navigate back to Login
+        FirebaseAuth.getInstance().signOut();
+        Toast.makeText(this, R.string.logged_out, Toast.LENGTH_SHORT).show();
         NavigationManager.navigateToLogin(this);
         finish();
     }
